@@ -16,16 +16,19 @@ export function WordDisplay({ word }: WordDisplayProps) {
   const { before, orp, after } = splitWordAtORP(word);
 
   return (
-    <div className="flex items-center justify-center h-40 bg-gray-900 rounded-lg relative">
+    <div className="flex items-center justify-center h-40 bg-gray-900 rounded-lg relative overflow-hidden">
       {/* Focal point indicator line */}
       <div className="absolute top-2 left-1/2 transform -translate-x-1/2 w-0.5 h-4 bg-red-500" />
       <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-0.5 h-4 bg-red-500" />
 
-      {/* Word display with ORP highlighting */}
-      <div className="font-mono text-5xl tracking-wider">
-        <span className="text-white">{before}</span>
+      {/* Word display with ORP centered */}
+      <div className="flex font-mono text-5xl tracking-wider">
+        {/* Before ORP - right aligned, fixed width */}
+        <span className="text-white w-32 text-right">{before}</span>
+        {/* ORP character - always centered */}
         <span className="text-red-500 font-bold">{orp}</span>
-        <span className="text-white">{after}</span>
+        {/* After ORP - left aligned, fixed width */}
+        <span className="text-white w-32 text-left">{after}</span>
       </div>
     </div>
   );
