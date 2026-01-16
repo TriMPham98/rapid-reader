@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { splitIntoWords, wpmToDelay } from '../utils/textProcessor';
+import { splitIntoWords, wpmToDelay, getPauseMultiplier } from '../utils/textProcessor';
 
 export interface RapidReaderState {
   words: string[];
@@ -23,12 +23,12 @@ export function useRapidReader(initialWpm: number = 300): RapidReaderState & Rap
   const [isPlaying, setIsPlaying] = useState(false);
   const [wpm, setWpmState] = useState(initialWpm);
 
-  const intervalRef = useRef<number | null>(null);
+  const timeoutRef = useRef<number | null>(null);
 
   const clearTimer = useCallback(() => {
-    if (intervalRef.current !== null) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
+    if (timeoutRef.current !== null) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
     }
   }, []);
 
@@ -72,25 +72,25 @@ export function useRapidReader(initialWpm: number = 300): RapidReaderState & Rap
     }
   }, [words.length]);
 
-  // Effect to handle the interval when playing
+  // Effect to handle word advancement with variable delays
   useEffect(() => {
-    if (isPlaying && words.length > 0) {
-      const delay = wpmToDelay(wpm);
+    if (isPlaying && words.length > 0 && currentIndex < words.length) {
+      const baseDelay = wpmToDelay(wpm);
+      const currentWord = words[currentIndex];
+      const pauseMultiplier = getPauseMultiplier(currentWord);
+      const delay = Math.round(baseDelay * pauseMultiplier);
 
-      intervalRef.current = window.setInterval(() => {
-        setCurrentIndex(prev => {
-          if (prev >= words.length - 1) {
-            setIsPlaying(false);
-            clearTimer();
-            return prev;
-          }
-          return prev + 1;
-        });
+      timeoutRef.current = window.setTimeout(() => {
+        if (currentIndex >= words.length - 1) {
+          setIsPlaying(false);
+        } else {
+          setCurrentIndex(prev => prev + 1);
+        }
       }, delay);
 
       return () => clearTimer();
     }
-  }, [isPlaying, wpm, words.length, clearTimer]);
+  }, [isPlaying, wpm, words, currentIndex, clearTimer]);
 
   return {
     words,

@@ -43,3 +43,25 @@ export function splitWordAtORP(word: string): { before: string; orp: string; aft
 export function wpmToDelay(wpm: number): number {
   return Math.round(60000 / wpm);
 }
+
+/**
+ * Get pause multiplier based on word's ending punctuation.
+ * Commas get a short pause, sentence endings get a longer pause.
+ */
+export function getPauseMultiplier(word: string): number {
+  const trimmed = word.trim();
+  const lastChar = trimmed[trimmed.length - 1];
+
+  // Sentence endings - longer pause (1.5x)
+  if (lastChar === '.' || lastChar === '!' || lastChar === '?') {
+    return 1.5;
+  }
+
+  // Commas, semicolons, colons - short pause (1.25x)
+  if (lastChar === ',' || lastChar === ';' || lastChar === ':') {
+    return 1.25;
+  }
+
+  // No pause
+  return 1;
+}
