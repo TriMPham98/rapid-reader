@@ -16,12 +16,14 @@ export function getORPIndex(word: string): number {
 
 /**
  * Split text into an array of words, preserving punctuation attached to words.
+ * Filters out standalone dashes and punctuation-only tokens.
  */
 export function splitIntoWords(text: string): string[] {
   return text
     .trim()
     .split(/\s+/)
-    .filter(word => word.length > 0);
+    .filter(word => word.length > 0)
+    .filter(word => /[a-zA-Z0-9]/.test(word)); // Must contain at least one letter or number
 }
 
 /**
