@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRapidReader } from './hooks/useRapidReader';
 import { WordDisplay } from './components/WordDisplay';
 import { Controls } from './components/Controls';
@@ -21,6 +21,19 @@ function App() {
   } = useRapidReader(300);
 
   const [focusMode, setFocusMode] = useState(false);
+
+  // Check for pre-selected text from Chrome extension context menu
+  useEffect(() => {
+    if (typeof chrome !== 'undefined' && chrome.storage?.local) {
+      chrome.storage.local.get(['selectedText'], (result: { selectedText?: string }) => {
+        if (result.selectedText) {
+          setText(result.selectedText);
+          // Clear the stored text after loading
+          chrome.storage.local.remove(['selectedText']);
+        }
+      });
+    }
+  }, [setText]);
 
   const currentWord = words[currentIndex] || '';
   const hasText = words.length > 0;
